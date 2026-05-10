@@ -118,10 +118,8 @@ def _parse_table(html: str) -> list[dict]:
             {
                 "title": name,
                 "city": city,
-                "state": state,
-                "country": "DE",
+                "country": "Germany",
                 "start_date": _iso(iso_date_td),
-                "end_date": _iso(iso_date_td),  # refined below if multi-day
                 "source_url": source_url,
             }
         )
@@ -147,7 +145,7 @@ def run_scraper(lookahead_days: int = 90) -> dict[str, int]:
             for row in rows:
                 url = row["source_url"]
                 if url not in seen:
-                    seen[url] = {**row, "discipline": discipline_label, "levels": []}
+                    seen[url] = {**row, "discipline": discipline_label, "levels": ["Unknown"]}
             log.info("  %d events found", len(rows))
         except Exception:
             log.exception("Failed scraping %s", code)
@@ -158,13 +156,35 @@ def run_scraper(lookahead_days: int = 90) -> dict[str, int]:
         return {"upserted": 0, "skipped": 0}
 
     records = list(seen.values())
-    log.info("Upserting %d unique events…", len(records))
+    log.info("Fetching existing source_urls…")
 
-    # Upsert in batches of 200
-    upserted = 0
-    for i in range(0, len(records), 200):
-        batch = records[i : i + 200]
-        sb.from_("events").upsert(batch, on_conflict="source_url").execute()
-        upserted += len(batch)
+    # Fetch all existing source_urls to avoid duplicates (no unique constraint yet)
+    existing_urls: set[str] = set()
+    page = 0
+    page_size = 1000
+    while True:
+        resp = (
+            sb.from_("events")
+            .select("source_url")
+            .range(page * page_size, (page + 1) * page_size - 1)
+            .execute()
+        )
+        if not resp.data:
+            break
+        for row in resp.data:
+            existing_urls.add(row["source_url"])
+        if len(resp.data) < page_size:
+            break
+        page += 1
 
-    return {"upserted": upserted, "skipped": 0}
+    log.info("  %d already in DB", len(existing_urls))
+    new_records = [r for r in records if r["source_url"] not in existing_urls]
+    log.info("  %d new events to insert", len(new_records))
+
+    inserted = 0
+    for i in range(0, len(new_records), 200):
+        batch = new_records[i : i + 200]
+        sb.from_("events").insert(batch).execute()
+        inserted += len(batch)
+
+    return {"upserted": inserted, "skipped": len(records) - len(new_records)}

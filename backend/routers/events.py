@@ -19,11 +19,11 @@ def _map_row(row: dict, distance: float | None = None) -> Event:
         state=row.get("state", ""),
         country=row.get("country", "DE"),
         date_start=row["start_date"],
-        date_end=row["end_date"],
+        date_end=row.get("end_date") or row["start_date"],
         discipline=row["discipline"],
         levels=row.get("levels") or [],
-        lat=row["latitude"],
-        lng=row["longitude"],
+        lat=row.get("latitude") or 0.0,
+        lng=row.get("longitude") or 0.0,
         source_url=row.get("source_url"),
         distance=distance,
     )
@@ -82,7 +82,7 @@ def list_events(
     if discipline:
         query = query.eq("discipline", discipline)
     if date_from:
-        query = query.gte("end_date", date_from)
+        query = query.gte("start_date", date_from)
     if date_to:
         query = query.lte("start_date", date_to)
     if city:
