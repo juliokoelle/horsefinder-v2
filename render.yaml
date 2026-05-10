@@ -26,17 +26,3 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://horsefinder-backend.onrender.com
-
-  - type: cron
-    name: horsefinder-scraper
-    env: python
-    plan: starter
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    schedule: "0 4 * * *"
-    startCommand: python -m backend.run_scraper
-    envVars:
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_KEY
-        sync: false
