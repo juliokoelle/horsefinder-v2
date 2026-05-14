@@ -6,6 +6,8 @@ export function useEvents(filters: EventFilters, userLocation?: UserLocation | n
   return useQuery<EventWithDistance[]>({
     queryKey: ['events', filters, userLocation ?? null],
     queryFn: () => fetchEvents(filters, userLocation),
+    retry: 3,
+    retryDelay: 2000,
   });
 }
 

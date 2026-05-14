@@ -20,7 +20,7 @@ const Index = () => {
     toggleLevel, setMapBounds, setThisWeekend, resetFilters,
   } = useEventFilters();
 
-  const { data: events = [], isLoading } = useEvents(filters, location);
+  const { data: events = [], isLoading, failureCount } = useEvents(filters, location);
 
   const handleSearchArea = (bounds: MapBounds) => setMapBounds(bounds);
 
@@ -35,36 +35,52 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, [highlightedEventId]);
 
+  const statusText = isLoading
+    ? failureCount > 0
+      ? `Connecting to server… (attempt ${failureCount + 1} of 4)`
+      : 'Loading events…'
+    : `${events.length} event${events.length !== 1 ? 's' : ''} found`;
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">🐴 HorseFinder</h1>
-              <p className="mt-0.5 text-sm text-muted-foreground">Discover equestrian events across Germany</p>
+      <header className="sticky top-0 z-40 shadow-md">
+        {/* Green gradient hero band */}
+        <div style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)' }} className="px-4 py-4">
+          <div className="mx-auto max-w-7xl">
+            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+              🐴 HorseFinder
+            </h1>
+            <p className="mt-0.5 text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
+              Discover equestrian events across Germany
+            </p>
+          </div>
+        </div>
+
+        {/* White filter + view toggle bar */}
+        <div className="border-b border-border bg-white px-4 py-3">
+          <div className="mx-auto flex max-w-7xl items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <FilterBar
+                city={filters.city}
+                onCityChange={setCity}
+                onUseLocation={requestLocation}
+                locationLoading={locationLoading}
+                hasLocation={!!location}
+                radius={filters.radius}
+                onRadiusChange={setRadius}
+                dateFrom={filters.dateFrom}
+                dateTo={filters.dateTo}
+                onDateRangeChange={setDateRange}
+                onThisWeekend={setThisWeekend}
+                discipline={filters.discipline}
+                onDisciplineChange={setDiscipline}
+                levels={filters.levels}
+                onToggleLevel={toggleLevel}
+                onReset={resetFilters}
+              />
             </div>
             <ViewToggle view={view} onViewChange={setView} />
           </div>
-
-          <FilterBar
-            city={filters.city}
-            onCityChange={setCity}
-            onUseLocation={requestLocation}
-            locationLoading={locationLoading}
-            hasLocation={!!location}
-            radius={filters.radius}
-            onRadiusChange={setRadius}
-            dateFrom={filters.dateFrom}
-            dateTo={filters.dateTo}
-            onDateRangeChange={setDateRange}
-            onThisWeekend={setThisWeekend}
-            discipline={filters.discipline}
-            onDisciplineChange={setDiscipline}
-            levels={filters.levels}
-            onToggleLevel={toggleLevel}
-            onReset={resetFilters}
-          />
         </div>
       </header>
 
@@ -73,7 +89,7 @@ const Index = () => {
           ? 'mx-auto mb-3 flex max-w-7xl items-center justify-between px-4'
           : 'mb-4 flex items-center justify-between'}>
           <p className="text-sm text-muted-foreground">
-            {isLoading ? 'Loading...' : `${events.length} event${events.length !== 1 ? 's' : ''} found`}
+            {statusText}
           </p>
         </div>
 
@@ -83,6 +99,7 @@ const Index = () => {
             isLoading={isLoading}
             highlightedEventId={highlightedEventId}
             onHoverEvent={setHoveredEventId}
+            onReset={resetFilters}
           />
         ) : (
           <MapErrorBoundary fallback={
