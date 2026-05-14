@@ -78,7 +78,8 @@ export function EventMap({ events, userLocation, activeBounds, onSearchArea, onM
   const activeBoundsRef = useRef<MapBounds | null>(activeBounds);
   const [showSearchBtn, setShowSearchBtn] = useState(false);
 
-  const markerData = useMemo(() => events.map((e) => e), [events]);
+  // Filter out events with no geocoded coordinates (lat=0,lng=0 = ungeoced)
+  const markerData = useMemo(() => events.filter((e) => e.lat !== 0 || e.lng !== 0), [events]);
 
   useEffect(() => { activeBoundsRef.current = activeBounds; setShowSearchBtn(false); }, [activeBounds]);
 

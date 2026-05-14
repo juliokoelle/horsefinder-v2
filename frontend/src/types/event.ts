@@ -1,4 +1,4 @@
-export type Discipline = 'show_jumping' | 'dressage' | 'eventing';
+export type Discipline = 'show_jumping' | 'dressage' | 'eventing' | 'driving' | 'vaulting' | 'leisure' | 'unknown';
 export type Level = 'E' | 'A' | 'L' | 'M' | 'S';
 
 export interface EquestrianEvent {
@@ -40,6 +40,10 @@ export interface UserLocation {
 
 export const DISCIPLINE_LABELS: Record<Discipline, string> = {
   show_jumping: 'Show Jumping',
-  dressage: 'Dressage',
-  eventing: 'Eventing',
+  dressage:     'Dressage',
+  eventing:     'Eventing',
+  driving:      'Driving',
+  vaulting:     'Vaulting',
+  leisure:      'Leisure',
+  unknown:      'Unknown',
 };

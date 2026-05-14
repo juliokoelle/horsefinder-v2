@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { List, Map } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventFilters } from '@/hooks/useEventFilters';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { FilterBar } from '@/components/FilterBar';
 import { EventList } from '@/components/EventList';
 import { EventMap } from '@/components/EventMap';
-import { ViewToggle } from '@/components/ViewToggle';
 import { MapErrorBoundary } from '@/components/MapErrorBoundary';
 import { MapBounds } from '@/types/event';
 
@@ -44,42 +45,70 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 shadow-md">
-        {/* Green gradient hero band */}
+        {/* Green gradient band with logo + view toggle */}
         <div style={{ background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)' }} className="px-4 py-4">
-          <div className="mx-auto max-w-7xl">
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-              🐴 HorseFinder
-            </h1>
-            <p className="mt-0.5 text-sm" style={{ color: 'rgba(255,255,255,0.72)' }}>
-              Discover equestrian events across Germany
-            </p>
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+            <Link to="/" className="group">
+              <h1
+                className="text-2xl font-bold text-white transition-opacity group-hover:opacity-85"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                🐴 HorseFinder
+              </h1>
+              <p className="mt-0.5 text-sm" style={{ color: 'rgba(255,255,255,0.70)' }}>
+                Discover equestrian events across Germany
+              </p>
+            </Link>
+
+            {/* Pill view toggle on dark background */}
+            <div className="flex rounded-full border border-white/30 overflow-hidden">
+              <button
+                onClick={() => setView('list')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                  view === 'list'
+                    ? 'bg-white text-[#1B4332]'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <List className="h-3.5 w-3.5" />
+                List
+              </button>
+              <button
+                onClick={() => setView('map')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium transition-colors ${
+                  view === 'map'
+                    ? 'bg-white text-[#1B4332]'
+                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <Map className="h-3.5 w-3.5" />
+                Map
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* White filter + view toggle bar */}
-        <div className="border-b border-border bg-white px-4 py-3">
-          <div className="mx-auto flex max-w-7xl items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <FilterBar
-                city={filters.city}
-                onCityChange={setCity}
-                onUseLocation={requestLocation}
-                locationLoading={locationLoading}
-                hasLocation={!!location}
-                radius={filters.radius}
-                onRadiusChange={setRadius}
-                dateFrom={filters.dateFrom}
-                dateTo={filters.dateTo}
-                onDateRangeChange={setDateRange}
-                onThisWeekend={setThisWeekend}
-                discipline={filters.discipline}
-                onDisciplineChange={setDiscipline}
-                levels={filters.levels}
-                onToggleLevel={toggleLevel}
-                onReset={resetFilters}
-              />
-            </div>
-            <ViewToggle view={view} onViewChange={setView} />
+        {/* White filter bar */}
+        <div className="border-b border-border bg-white px-4 py-3 shadow-sm">
+          <div className="mx-auto max-w-7xl">
+            <FilterBar
+              city={filters.city}
+              onCityChange={setCity}
+              onUseLocation={requestLocation}
+              locationLoading={locationLoading}
+              hasLocation={!!location}
+              radius={filters.radius}
+              onRadiusChange={setRadius}
+              dateFrom={filters.dateFrom}
+              dateTo={filters.dateTo}
+              onDateRangeChange={setDateRange}
+              onThisWeekend={setThisWeekend}
+              discipline={filters.discipline}
+              onDisciplineChange={setDiscipline}
+              levels={filters.levels}
+              onToggleLevel={toggleLevel}
+              onReset={resetFilters}
+            />
           </div>
         </div>
       </header>
@@ -88,9 +117,7 @@ const Index = () => {
         <div className={view === 'map'
           ? 'mx-auto mb-3 flex max-w-7xl items-center justify-between px-4'
           : 'mb-4 flex items-center justify-between'}>
-          <p className="text-sm text-muted-foreground">
-            {statusText}
-          </p>
+          <p className="text-sm text-muted-foreground">{statusText}</p>
         </div>
 
         {view === 'list' ? (

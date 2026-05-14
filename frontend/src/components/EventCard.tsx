@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { ExternalLink, ArrowRight } from 'lucide-react';
+import { ExternalLink, ArrowRight, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,11 +7,14 @@ import { EventWithDistance } from '@/services/eventService';
 import { DISCIPLINE_LABELS } from '@/types/event';
 import { getSortedLevels, LEVEL_STYLE_CLASSES } from '@/lib/eventLevels';
 
-const DISCIPLINE_COLORS: Record<string, string> = {
-  show_jumping: '#2D6A4F',
-  dressage: '#4A6FA5',
-  eventing: '#B5451B',
-  unknown: '#94A3B8',
+export const DISCIPLINE_COLORS: Record<string, string> = {
+  dressage:     '#3B82F6',
+  show_jumping: '#10B981',
+  eventing:     '#F59E0B',
+  driving:      '#8B5CF6',
+  vaulting:     '#EC4899',
+  leisure:      '#06B6D4',
+  unknown:      '#6B7280',
 };
 
 interface EventCardProps {
@@ -32,24 +35,17 @@ export function EventCard({ event }: EventCardProps) {
       className="group relative h-full cursor-pointer overflow-hidden rounded-xl border-border/70 shadow-event-card transition-all duration-200 hover:-translate-y-1 hover:shadow-event-float active:translate-y-0 active:shadow-event-card"
     >
       {/* Left discipline accent bar */}
-      <div
-        className="absolute left-0 top-0 h-full w-1"
-        style={{ backgroundColor: accentColor }}
-      />
+      <div className="absolute left-0 top-0 h-full w-1" style={{ backgroundColor: accentColor }} />
 
       <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-5 pr-4 pt-4 text-left">
-        {/* Top row: level badges + date badge */}
+        {/* Top row: discipline badge + date badge */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap gap-1.5">
-            {sortedLevels.map((level) => (
-              <span
-                key={level}
-                className={`inline-flex min-w-8 items-center justify-center rounded-full border px-2.5 py-1 text-xs font-bold leading-none ${LEVEL_STYLE_CLASSES[level]}`}
-              >
-                {level}
-              </span>
-            ))}
-          </div>
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+            style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+          >
+            {DISCIPLINE_LABELS[event.discipline]}
+          </span>
 
           {/* Date badge */}
           <div
@@ -66,23 +62,29 @@ export function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold leading-snug text-card-foreground">
+        <h3 className="text-[15px] font-bold leading-snug text-card-foreground">
           {event.name}
         </h3>
 
         {/* Location */}
-        <p className="flex items-center gap-1 text-sm text-muted-foreground">
-          <span>📍</span>
+        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
           <span>{locationLine}</span>
         </p>
 
-        {/* Discipline pill */}
-        <span
-          className="inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-          style={{ backgroundColor: `${accentColor}15`, color: accentColor }}
-        >
-          {DISCIPLINE_LABELS[event.discipline]}
-        </span>
+        {/* Level badges — only show if levels are known */}
+        {sortedLevels.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {sortedLevels.map((level) => (
+              <span
+                key={level}
+                className={`inline-flex min-w-8 items-center justify-center rounded-full border px-2.5 py-1 text-xs font-bold leading-none ${LEVEL_STYLE_CLASSES[level]}`}
+              >
+                {level}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="mt-auto" />
 

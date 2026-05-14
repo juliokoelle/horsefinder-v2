@@ -143,9 +143,12 @@ export function FilterBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Disciplines</SelectItem>
-          <SelectItem value="show_jumping">Show Jumping</SelectItem>
           <SelectItem value="dressage">Dressage</SelectItem>
+          <SelectItem value="show_jumping">Show Jumping</SelectItem>
           <SelectItem value="eventing">Eventing</SelectItem>
+          <SelectItem value="driving">Driving</SelectItem>
+          <SelectItem value="vaulting">Vaulting</SelectItem>
+          <SelectItem value="leisure">Leisure</SelectItem>
         </SelectContent>
       </Select>
 
