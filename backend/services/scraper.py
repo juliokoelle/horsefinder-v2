@@ -45,9 +45,38 @@ def _make_session() -> requests.Session:
     return s
 
 
-def _iso(german_date: str) -> str:
-    """Convert '2026-05-16 00:00:00' to '2026-05-16'."""
-    return german_date.strip().split(" ")[0]
+def _iso(raw_date: str) -> str:
+    """Normalise to YYYY-MM-DD. Handles '2026-05-23 00:00:00' and '23.05.2026'."""
+    v = raw_date.strip().split(" ")[0]  # strip time component
+    if "." in v:  # DD.MM.YYYY → YYYY-MM-DD
+        parts = v.split(".")
+        if len(parts) == 3:
+            return f"{parts[2]}-{parts[1].zfill(2)}-{parts[0].zfill(2)}"
+    return v
+
+
+def _extract_end_date(title: str, start_iso: str) -> str:
+    """
+    Try to extract an end date from the title string.
+    Handles: 'City (DD.MM.YYYY - DD.MM.YYYY)' or 'Event DD.MM.YYYY – DD.MM.YYYY'.
+    Falls back to start_iso when no range is found.
+    """
+    # Full range: DD.MM.YYYY - DD.MM.YYYY (dash or en-dash)
+    m = re.search(r"\d{1,2}\.\d{1,2}\.\d{4}\s*[-–—]\s*(\d{1,2}\.\d{1,2}\.\d{4})", title)
+    if m:
+        return _iso(m.group(1))
+    return start_iso
+
+
+def _extract_city(name: str) -> str:
+    """
+    Extract city from the tournament name.
+    Split on ' / ' or ' – '/' - ' (with spaces) only — preserve hyphens in city names
+    like 'Waldshut-Tiengen' and compound names like 'Gestüt-Hof Bohm'.
+    """
+    # Split on slash with optional spaces, or em/en-dash with spaces
+    parts = re.split(r"\s*/\s*|\s+[-–—]\s+", name)
+    return parts[0].strip()
 
 
 def _fetch_results(
@@ -93,10 +122,13 @@ def _parse_table(html: str) -> list[dict]:
         if len(tds) < 6:
             continue
 
-        # tds[0] = date text, tds[1] = ISO date, tds[2] = name+link,
-        # tds[3] = Landesverband, tds[4] = Nennschluss text, tds[5] = ISO nennschluss
-        iso_date_td = tds[1].get_text(strip=True)
-        if not iso_date_td:
+        # tds[0] = date text (DD.MM.YYYY, single date — no range in list view)
+        # tds[1] = ISO-ish date ('2026-05-23 00:00:00')
+        # tds[2] = name + link
+        # tds[3] = Landesverband (state/region)
+        # tds[4] = Nennschluss text, tds[5] = ISO nennschluss
+        raw_date = tds[1].get_text(strip=True)
+        if not raw_date:
             continue
 
         link = tds[2].find("a")
@@ -106,20 +138,19 @@ def _parse_table(html: str) -> list[dict]:
         href = link.get("href", "")
         name = link.get_text(strip=True)
         source_url = f"{BASE_URL}{href}" if href.startswith("/") else href
-
-        # State/Landesverband
         state = tds[3].get_text(strip=True)
-
-        # City: extract from name or state — name often includes city
-        # Format is typically "City/ Venue Name" or "City - Venue"
-        city = re.split(r"[/\-–]", name)[0].strip()
+        city = _extract_city(name)
+        start_iso = _iso(raw_date)
+        end_iso = _extract_end_date(name, start_iso)
 
         rows.append(
             {
                 "title": name,
                 "city": city,
+                "state": state,
                 "country": "Germany",
-                "start_date": _iso(iso_date_td),
+                "start_date": start_iso,
+                "end_date": end_iso,
                 "source_url": source_url,
             }
         )

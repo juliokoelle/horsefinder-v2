@@ -32,10 +32,9 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card
       onClick={handleCardClick}
-      className="group relative h-full cursor-pointer overflow-hidden rounded-xl border-border/70 shadow-event-card transition-all duration-200 hover:-translate-y-1 hover:shadow-event-float active:translate-y-0 active:shadow-event-card"
+      className="group relative h-full cursor-pointer overflow-hidden rounded-xl shadow-event-card transition-all duration-200 hover:-translate-y-1 hover:shadow-event-float active:translate-y-0 active:shadow-event-card"
+      style={{ borderLeft: `4px solid ${accentColor}` }}
     >
-      {/* Left discipline accent bar */}
-      <div className="absolute left-0 top-0 h-full w-1" style={{ backgroundColor: accentColor }} />
 
       <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-5 pr-4 pt-4 text-left">
         {/* Top row: discipline badge + date badge */}
