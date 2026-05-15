@@ -13,8 +13,11 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { Discipline, Level } from '@/types/event';
+import { Discipline, Level, DISCIPLINE_LABELS } from '@/types/event';
 import { LEVEL_STYLE_CLASSES, getSortedLevels } from '@/lib/eventLevels';
+import { DISCIPLINE_COLORS } from '@/components/EventCard';
+
+const DISCIPLINE_OPTIONS: Discipline[] = ['show_jumping', 'dressage', 'eventing', 'driving', 'vaulting', 'leisure'];
 
 interface FilterBarProps {
   city: string;
@@ -30,8 +33,8 @@ interface FilterBarProps {
   onThisWeekend: () => void;
   onThisWeek: () => void;
   onThisMonth: () => void;
-  discipline: Discipline | null;
-  onDisciplineChange: (d: Discipline | null) => void;
+  disciplines: Discipline[];
+  onToggleDiscipline: (d: Discipline) => void;
   levels: Level[];
   onToggleLevel: (level: Level) => void;
   onReset: () => void;
@@ -53,15 +56,15 @@ export function FilterBar({
   onThisWeekend,
   onThisWeek,
   onThisMonth,
-  discipline,
-  onDisciplineChange,
+  disciplines,
+  onToggleDiscipline,
   levels = [],
   onToggleLevel,
   onReset,
 }: FilterBarProps) {
   const [datePickerDate, setDatePickerDate] = useState<{ from: Date; to?: Date } | undefined>(undefined);
 
-  const hasActiveFilters = !!(city || radius || dateFrom || dateTo || discipline || levels.length);
+  const hasActiveFilters = !!(city || radius || dateFrom || dateTo || disciplines.length || levels.length);
   const selectedLevels = useMemo(() => getSortedLevels(levels ?? []), [levels]);
   const levelLabel = selectedLevels.length === 0
     ? 'All Levels'
@@ -138,23 +141,53 @@ export function FilterBar({
         </PopoverContent>
       </Popover>
 
-      <Select
-        value={discipline ?? 'all'}
-        onValueChange={(v) => onDisciplineChange(v === 'all' ? null : (v as Discipline))}
-      >
-        <SelectTrigger className="h-10 w-[150px] rounded-lg border-border/80 bg-card text-sm shadow-sm">
-          <SelectValue placeholder="Discipline" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Disciplines</SelectItem>
-          <SelectItem value="dressage">Dressage</SelectItem>
-          <SelectItem value="show_jumping">Show Jumping</SelectItem>
-          <SelectItem value="eventing">Eventing</SelectItem>
-          <SelectItem value="driving">Driving</SelectItem>
-          <SelectItem value="vaulting">Vaulting</SelectItem>
-          <SelectItem value="leisure">Leisure</SelectItem>
-        </SelectContent>
-      </Select>
+      {/* Discipline multi-select */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-10 min-w-[148px] justify-between rounded-lg border-border/80 bg-card px-3 text-sm font-normal shadow-sm">
+            <span>
+              {disciplines.length === 0
+                ? 'All Disciplines'
+                : disciplines.length === 1
+                  ? DISCIPLINE_LABELS[disciplines[0]]
+                  : `${disciplines.length} disciplines`}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[220px] rounded-lg border-border/80 p-3" align="start">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">Disciplines</p>
+            {disciplines.length > 0 && (
+              <Button variant="ghost" size="sm" className="h-auto px-2 py-1 text-xs" onClick={() => disciplines.forEach(onToggleDiscipline)}>
+                Clear
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {DISCIPLINE_OPTIONS.map((d) => {
+              const isActive = disciplines.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => onToggleDiscipline(d)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left',
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
+                  )}
+                >
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: DISCIPLINE_COLORS[d] }}
+                  />
+                  {DISCIPLINE_LABELS[d]}
+                </button>
+              );
+            })}
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <Popover>
         <PopoverTrigger asChild>

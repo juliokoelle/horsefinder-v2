@@ -11,7 +11,7 @@ const defaultFilters: EventFilters = {
   radius: null,
   dateFrom: null,
   dateTo: null,
-  discipline: null,
+  disciplines: [],
   levels: [],
   mapBounds: null,
 };
@@ -31,8 +31,11 @@ export function useEventFilters() {
     setFilters((prev) => ({ ...prev, dateFrom, dateTo }));
   }, []);
 
-  const setDiscipline = useCallback((discipline: Discipline | null) => {
-    setFilters((prev) => ({ ...prev, discipline }));
+  const toggleDiscipline = useCallback((d: Discipline) => {
+    setFilters((prev) => {
+      const already = prev.disciplines.includes(d);
+      return { ...prev, disciplines: already ? prev.disciplines.filter(x => x !== d) : [...prev.disciplines, d] };
+    });
   }, []);
 
   const setLevels = useCallback((levels: Level[]) => {
@@ -106,7 +109,7 @@ export function useEventFilters() {
     setCity,
     setRadius,
     setDateRange,
-    setDiscipline,
+    toggleDiscipline,
     setLevels,
     toggleLevel,
     setMapBounds,

@@ -32,18 +32,18 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card
       onClick={handleCardClick}
-      className="group relative h-full cursor-pointer overflow-hidden rounded-xl shadow-event-card transition-all duration-200 hover:-translate-y-1 hover:shadow-event-float active:translate-y-0 active:shadow-event-card"
-      style={{ borderLeft: `4px solid ${accentColor}` }}
+      className="group relative h-full cursor-pointer overflow-hidden rounded-xl border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+      style={{ borderTop: `3px solid ${accentColor}` }}
     >
-
-      <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-5 pr-4 pt-4 text-left">
+      <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-4 pr-4 pt-3.5 text-left">
         {/* Top row: discipline badge + date badge */}
         <div className="flex items-start justify-between gap-2">
           {event.discipline !== 'unknown' ? (
             <span
-              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={{ backgroundColor: `${accentColor}15`, color: accentColor }}
             >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
               {DISCIPLINE_LABELS[event.discipline]}
             </span>
           ) : (
@@ -51,25 +51,22 @@ export function EventCard({ event }: EventCardProps) {
           )}
 
           {/* Date badge */}
-          <div
-            className="shrink-0 rounded-lg px-2 py-1 text-center"
-            style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
-          >
+          <div className="shrink-0 rounded-md bg-muted px-2 py-1 text-center">
             {event.dateEnd && event.dateEnd !== event.dateStart ? (
               <>
-                <span className="block text-[11px] font-bold leading-tight">
+                <span className="block text-[11px] font-bold leading-tight text-foreground">
                   {format(new Date(event.dateStart), 'dd')}–{format(new Date(event.dateEnd), 'dd')}
                 </span>
-                <span className="block text-[10px] font-semibold uppercase tracking-wide">
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {format(new Date(event.dateStart), 'MMM')}
                 </span>
               </>
             ) : (
               <>
-                <span className="block text-base font-bold leading-none">
+                <span className="block text-base font-bold leading-none text-foreground">
                   {format(new Date(event.dateStart), 'dd')}
                 </span>
-                <span className="block text-[10px] font-semibold uppercase tracking-wide">
+                <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {format(new Date(event.dateStart), 'MMM')}
                 </span>
               </>
@@ -88,7 +85,7 @@ export function EventCard({ event }: EventCardProps) {
           <span>{locationLine}</span>
         </p>
 
-        {/* Level badges — only show if levels are known */}
+        {/* Level badges */}
         {sortedLevels.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {sortedLevels.map((level) => (

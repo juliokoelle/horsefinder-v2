@@ -139,17 +139,19 @@ export default function EventPage() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${accentColor}18` }}>
-              <Trophy className="h-4 w-4" style={{ color: accentColor }} />
+          {event.discipline !== 'unknown' && (
+            <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${accentColor}18` }}>
+                <Trophy className="h-4 w-4" style={{ color: accentColor }} />
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Discipline</p>
+                <p className="mt-0.5 text-sm font-semibold text-foreground">
+                  {DISCIPLINE_LABELS[event.discipline]}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Discipline</p>
-              <p className="mt-0.5 text-sm font-semibold text-foreground">
-                {DISCIPLINE_LABELS[event.discipline]}
-              </p>
-            </div>
-          </div>
+          )}
 
           {sortedLevels.length > 0 && (
             <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -202,7 +204,7 @@ export default function EventPage() {
         {!hasCoords && (
           <div className="flex items-center gap-3 rounded-xl border border-border bg-card/50 p-4 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
-            Map loading — coordinates are being geocoded in the background.
+            Location unavailable for this event.
           </div>
         )}
       </div>

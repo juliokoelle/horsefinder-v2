@@ -31,7 +31,7 @@ def _map_row(row: dict, distance: float | None = None) -> Event:
 
 @router.get("", response_model=list[Event])
 def list_events(
-    discipline: str | None = None,
+    discipline: Annotated[list[str] | None, Query()] = None,
     date_from: str | None = None,
     date_to: str | None = None,
     city: str | None = None,
@@ -59,7 +59,7 @@ def list_events(
         events = [_map_row(r, distance=round(r["dist_km"])) for r in resp.data]
 
         if discipline:
-            events = [e for e in events if e.discipline == discipline]
+            events = [e for e in events if e.discipline in discipline]
         if date_from:
             events = [e for e in events if e.date_end >= date_from]
         if date_to:
@@ -80,7 +80,7 @@ def list_events(
     query = sb.from_("events").select("*")
 
     if discipline:
-        query = query.eq("discipline", discipline)
+        query = query.in_("discipline", discipline)
     if date_from:
         query = query.gte("start_date", date_from)
     if date_to:

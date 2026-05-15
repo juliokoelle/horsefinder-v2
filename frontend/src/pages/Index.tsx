@@ -17,7 +17,7 @@ const Index = () => {
 
   const { location, loading: locationLoading, requestLocation } = useGeolocation();
   const {
-    filters, setCity, setRadius, setDateRange, setDiscipline,
+    filters, setCity, setRadius, setDateRange, toggleDiscipline,
     toggleLevel, setMapBounds, setThisWeekend, setThisWeek, setThisMonth, resetFilters,
   } = useEventFilters();
 
@@ -105,8 +105,8 @@ const Index = () => {
               onThisWeekend={setThisWeekend}
               onThisWeek={setThisWeek}
               onThisMonth={setThisMonth}
-              discipline={filters.discipline}
-              onDisciplineChange={setDiscipline}
+              disciplines={filters.disciplines}
+              onToggleDiscipline={toggleDiscipline}
               levels={filters.levels}
               onToggleLevel={toggleLevel}
               onReset={resetFilters}

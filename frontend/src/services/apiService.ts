@@ -65,7 +65,7 @@ export async function fetchEvents(
 ): Promise<EventWithDistance[]> {
   const params: Record<string, string | number | string[]> = {};
 
-  if (filters.discipline) params.discipline = filters.discipline;
+  if (filters.disciplines?.length) params.discipline = filters.disciplines;
   if (filters.dateFrom)   params.date_from = filters.dateFrom;
   if (filters.dateTo)     params.date_to = filters.dateTo;
   if (filters.city.trim()) params.city = filters.city.trim();

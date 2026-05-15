@@ -28,7 +28,7 @@ export interface EventFilters {
   radius: number | null; // km
   dateFrom: string | null;
   dateTo: string | null;
-  discipline: Discipline | null;
+  disciplines: Discipline[];
   levels: Level[];
   mapBounds: MapBounds | null;
 }
