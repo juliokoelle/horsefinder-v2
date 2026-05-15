@@ -80,6 +80,27 @@ export function useEventFilters() {
     }));
   }, []);
 
+  const setThisWeek = useCallback(() => {
+    const today = new Date();
+    const sunday = new Date(today);
+    sunday.setDate(today.getDate() + (7 - today.getDay()) % 7 || 7);
+    setFilters((prev) => ({
+      ...prev,
+      dateFrom: today.toISOString().split('T')[0],
+      dateTo: sunday.toISOString().split('T')[0],
+    }));
+  }, []);
+
+  const setThisMonth = useCallback(() => {
+    const today = new Date();
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    setFilters((prev) => ({
+      ...prev,
+      dateFrom: today.toISOString().split('T')[0],
+      dateTo: endOfMonth.toISOString().split('T')[0],
+    }));
+  }, []);
+
   return {
     filters,
     setCity,
@@ -91,6 +112,8 @@ export function useEventFilters() {
     setMapBounds,
     clearMapBounds,
     setThisWeekend,
+    setThisWeek,
+    setThisMonth,
     resetFilters,
   };
 }

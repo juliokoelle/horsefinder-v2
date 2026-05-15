@@ -120,7 +120,9 @@ export default function EventPage() {
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Date</p>
               <p className="mt-0.5 text-sm font-semibold text-foreground">
-                {format(new Date(event.dateStart), 'dd MMMM yyyy')}
+                {event.dateEnd && event.dateEnd !== event.dateStart
+                  ? `${format(new Date(event.dateStart), 'dd MMM')} – ${format(new Date(event.dateEnd), 'dd MMM yyyy')}`
+                  : format(new Date(event.dateStart), 'dd MMMM yyyy')}
               </p>
             </div>
           </div>

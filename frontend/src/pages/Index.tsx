@@ -18,7 +18,7 @@ const Index = () => {
   const { location, loading: locationLoading, requestLocation } = useGeolocation();
   const {
     filters, setCity, setRadius, setDateRange, setDiscipline,
-    toggleLevel, setMapBounds, setThisWeekend, resetFilters,
+    toggleLevel, setMapBounds, setThisWeekend, setThisWeek, setThisMonth, resetFilters,
   } = useEventFilters();
 
   const { data: events = [], isLoading, failureCount } = useEvents(filters, location);
@@ -103,6 +103,8 @@ const Index = () => {
               dateTo={filters.dateTo}
               onDateRangeChange={setDateRange}
               onThisWeekend={setThisWeekend}
+              onThisWeek={setThisWeek}
+              onThisMonth={setThisMonth}
               discipline={filters.discipline}
               onDisciplineChange={setDiscipline}
               levels={filters.levels}

@@ -28,6 +28,8 @@ interface FilterBarProps {
   dateTo: string | null;
   onDateRangeChange: (from: string | null, to: string | null) => void;
   onThisWeekend: () => void;
+  onThisWeek: () => void;
+  onThisMonth: () => void;
   discipline: Discipline | null;
   onDisciplineChange: (d: Discipline | null) => void;
   levels: Level[];
@@ -49,6 +51,8 @@ export function FilterBar({
   dateTo,
   onDateRangeChange,
   onThisWeekend,
+  onThisWeek,
+  onThisMonth,
   discipline,
   onDisciplineChange,
   levels = [],
@@ -114,10 +118,10 @@ export function FilterBar({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto rounded-lg border-border/80 p-0" align="start">
-          <div className="border-b border-border p-2">
-            <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onThisWeekend}>
-              This Weekend
-            </Button>
+          <div className="flex flex-col border-b border-border p-2">
+            <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onThisWeek}>This Week</Button>
+            <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onThisWeekend}>This Weekend</Button>
+            <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onThisMonth}>This Month</Button>
           </div>
           <Calendar
             mode="range"

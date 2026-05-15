@@ -39,24 +39,41 @@ export function EventCard({ event }: EventCardProps) {
       <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-5 pr-4 pt-4 text-left">
         {/* Top row: discipline badge + date badge */}
         <div className="flex items-start justify-between gap-2">
-          <span
-            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-            style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
-          >
-            {DISCIPLINE_LABELS[event.discipline]}
-          </span>
+          {event.discipline !== 'unknown' ? (
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+            >
+              {DISCIPLINE_LABELS[event.discipline]}
+            </span>
+          ) : (
+            <span />
+          )}
 
           {/* Date badge */}
           <div
             className="shrink-0 rounded-lg px-2 py-1 text-center"
             style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
           >
-            <span className="block text-base font-bold leading-none">
-              {format(new Date(event.dateStart), 'dd')}
-            </span>
-            <span className="block text-[10px] font-semibold uppercase tracking-wide">
-              {format(new Date(event.dateStart), 'MMM')}
-            </span>
+            {event.dateEnd && event.dateEnd !== event.dateStart ? (
+              <>
+                <span className="block text-[11px] font-bold leading-tight">
+                  {format(new Date(event.dateStart), 'dd')}–{format(new Date(event.dateEnd), 'dd')}
+                </span>
+                <span className="block text-[10px] font-semibold uppercase tracking-wide">
+                  {format(new Date(event.dateStart), 'MMM')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block text-base font-bold leading-none">
+                  {format(new Date(event.dateStart), 'dd')}
+                </span>
+                <span className="block text-[10px] font-semibold uppercase tracking-wide">
+                  {format(new Date(event.dateStart), 'MMM')}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
