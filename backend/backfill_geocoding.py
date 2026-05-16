@@ -1,12 +1,13 @@
 """
-Geocode all events with lat=0 via Nominatim and write coordinates back to Supabase.
+Geocode ALL events via Photon (Komoot/OSM) and write coordinates back to Supabase.
+Re-geocodes everything — not just lat=0 — so Nominatim errors are corrected.
 Run once locally: python -m backend.backfill_geocoding
 """
 from __future__ import annotations
 
 import os
+import re
 import sys
-import time
 import logging
 
 import requests
@@ -24,19 +25,18 @@ HEADERS = {
     "Authorization": f"Bearer {SUPABASE_KEY}",
     "Content-Type": "application/json",
 }
-NOM_HEADERS = {"User-Agent": "horsefinder-backfill/1.0 (personal project)"}
+PHOTON_HEADERS = {"User-Agent": "horsefinder-backfill/1.0 (personal project)"}
 
 
-def _fetch_cities() -> dict[str, list[str]]:
-    """Returns {city: [id, ...]} for all events with lat=0."""
+def _fetch_all_cities() -> dict[str, list[str]]:
+    """Returns {city: [id, ...]} for ALL events."""
     city_ids: dict[str, list[str]] = {}
     page, size = 0, 1000
     while True:
         resp = requests.get(
             f"{SUPABASE_URL}/rest/v1/events",
             headers=HEADERS,
-            params={"select": "id,city", "lat": "eq.0",
-                    "limit": size, "offset": page * size},
+            params={"select": "id,city", "limit": size, "offset": page * size},
             timeout=15,
         )
         resp.raise_for_status()
@@ -52,20 +52,40 @@ def _fetch_cities() -> dict[str, list[str]]:
     return city_ids
 
 
-def _geocode(city: str) -> tuple[float, float] | None:
+def _normalize(city: str) -> str:
+    """Replace '/' with space and strip known venue suffixes."""
+    q = city.replace("/", " ").strip()
+    q = re.sub(r"\s+(GmbH|e\.V\.|eV|AG|KG|UG)\b.*", "", q, flags=re.IGNORECASE).strip()
+    return q
+
+
+def _photon_query(q: str) -> tuple[float, float] | None:
+    """Single Photon request. Returns (lat, lng) or None."""
     resp = requests.get(
-        "https://nominatim.openstreetmap.org/search",
-        params={"q": city, "country": "Germany", "format": "json", "limit": 1},
-        headers=NOM_HEADERS,
+        "https://photon.komoot.io/api/",
+        params={"q": q, "countrycode": "de", "limit": 1},
+        headers=PHOTON_HEADERS,
         timeout=8,
     )
-    data = resp.json()
-    if data:
-        return float(data[0]["lat"]), float(data[0]["lon"])
+    resp.raise_for_status()
+    features = resp.json().get("features", [])
+    if features:
+        # GeoJSON: coordinates are [lng, lat]
+        coords = features[0]["geometry"]["coordinates"]
+        return float(coords[1]), float(coords[0])
     return None
 
 
-def _update_city(city: str, lat: float, lng: float) -> int:
+def _geocode(city: str) -> tuple[float, float] | None:
+    """Try original name, then normalized variant."""
+    for q in dict.fromkeys([city, _normalize(city)]):  # deduplicated, order preserved
+        result = _photon_query(q)
+        if result:
+            return result
+    return None
+
+
+def _update_city(city: str, lat: float, lng: float) -> None:
     resp = requests.patch(
         f"{SUPABASE_URL}/rest/v1/events",
         headers={**HEADERS, "Prefer": "return=minimal"},
@@ -74,17 +94,16 @@ def _update_city(city: str, lat: float, lng: float) -> int:
         timeout=15,
     )
     resp.raise_for_status()
-    return 1
 
 
 def main() -> None:
-    log.info("Fetching cities with lat=0…")
-    city_ids = _fetch_cities()
+    log.info("Fetching all cities (re-geocoding everything with Photon)…")
+    city_ids = _fetch_all_cities()
     log.info("%d unique cities across %d events", len(city_ids), sum(len(v) for v in city_ids.values()))
 
     ok, fail = 0, 0
     for i, city in enumerate(sorted(city_ids)):
-        log.info("[%d/%d] Geocoding: %s", i + 1, len(city_ids), city)
+        log.info("[%d/%d] %s", i + 1, len(city_ids), city)
         try:
             coords = _geocode(city)
             if coords:
@@ -97,7 +116,6 @@ def main() -> None:
         except Exception as e:
             log.warning("  → error: %s", e)
             fail += 1
-        time.sleep(1.1)
 
     log.info("Done. %d geocoded, %d failed.", ok, fail)
 
