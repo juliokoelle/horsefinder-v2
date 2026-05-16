@@ -22,8 +22,8 @@ def _map_row(row: dict, distance: float | None = None) -> Event:
         date_end=row.get("end_date") or row["start_date"],
         discipline=row["discipline"],
         levels=row.get("levels") or [],
-        lat=row.get("latitude") or 0.0,
-        lng=row.get("longitude") or 0.0,
+        lat=row.get("lat") or 0.0,
+        lng=row.get("lng") or 0.0,
         source_url=row.get("source_url"),
         distance=distance,
     )
@@ -93,10 +93,10 @@ def list_events(
     if all(v is not None for v in (bounds_n, bounds_s, bounds_e, bounds_w)):
         query = (
             query
-            .gte("latitude", bounds_s)
-            .lte("latitude", bounds_n)
-            .gte("longitude", bounds_w)
-            .lte("longitude", bounds_e)
+            .gte("lat", bounds_s)
+            .lte("lat", bounds_n)
+            .gte("lng", bounds_w)
+            .lte("lng", bounds_e)
         )
 
     resp = query.execute()
