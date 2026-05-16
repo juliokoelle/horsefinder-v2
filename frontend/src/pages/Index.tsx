@@ -131,20 +131,22 @@ const Index = () => {
             onReset={resetFilters}
           />
         ) : (
-          <MapErrorBoundary fallback={
-            <div className="mx-auto flex h-[calc(100vh-220px)] min-h-[520px] max-w-7xl items-center justify-center rounded-2xl border border-border bg-card px-4 text-sm text-muted-foreground shadow-event-card">
-              Map unavailable. Switch back to list view.
-            </div>
-          }>
-            <EventMap
-              events={events}
-              userLocation={location}
-              activeBounds={filters.mapBounds}
-              onSearchArea={handleSearchArea}
-              onMarkerSelect={handleMarkerSelect}
-              hoveredEventId={hoveredEventId}
-            />
-          </MapErrorBoundary>
+          <div style={{ isolation: 'isolate' }}>
+            <MapErrorBoundary fallback={
+              <div className="mx-auto flex h-[calc(100vh-220px)] min-h-[520px] max-w-7xl items-center justify-center rounded-2xl border border-border bg-card px-4 text-sm text-muted-foreground shadow-event-card">
+                Map unavailable. Switch back to list view.
+              </div>
+            }>
+              <EventMap
+                events={events}
+                userLocation={location}
+                activeBounds={filters.mapBounds}
+                onSearchArea={handleSearchArea}
+                onMarkerSelect={handleMarkerSelect}
+                hoveredEventId={hoveredEventId}
+              />
+            </MapErrorBoundary>
+          </div>
         )}
       </main>
     </div>
