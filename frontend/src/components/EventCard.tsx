@@ -1,11 +1,12 @@
 import { format } from 'date-fns';
-import { ExternalLink, ArrowRight, MapPin, Trophy } from 'lucide-react';
+import { ExternalLink, ArrowRight, MapPin, Trophy, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EventWithDistance } from '@/services/apiService';
 import { DISCIPLINE_LABELS, Level } from '@/types/event';
 import { getSortedLevels, LEVEL_STYLE_CLASSES } from '@/lib/eventLevels';
+import { useAuth } from '@/contexts/AuthContext';
 
 const VALID_LEVELS = new Set<Level>(['E', 'A', 'A*', 'A**', 'L', 'M', 'M*', 'S', 'WB']);
 
@@ -21,15 +22,27 @@ export const DISCIPLINE_COLORS: Record<string, string> = {
 
 interface EventCardProps {
   event: EventWithDistance;
+  isFavorite?: boolean;
+  onFavoriteToggle?: (eventId: string) => void;
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, isFavorite = false, onFavoriteToggle }: EventCardProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const sortedLevels = getSortedLevels(event.levels.filter((l) => VALID_LEVELS.has(l)));
   const locationLine = event.distance !== null ? `${event.distance} km · ${event.city}` : event.city;
   const accentColor = DISCIPLINE_COLORS[event.discipline] ?? DISCIPLINE_COLORS.unknown;
 
   const handleCardClick = () => navigate(`/events/${event.id}`);
+
+  function handleFavorite(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    onFavoriteToggle?.(event.id);
+  }
 
   return (
     <Card
@@ -38,7 +51,7 @@ export function EventCard({ event }: EventCardProps) {
       style={{ borderTop: `3px solid ${accentColor}` }}
     >
       <CardContent className="flex h-full flex-col gap-2.5 pb-4 pl-4 pr-4 pt-3.5 text-left">
-        {/* Top row: discipline badge + date badge */}
+        {/* Top row: discipline badge + date badge + heart */}
         <div className="flex items-start justify-between gap-2">
           {event.discipline !== 'unknown' ? (
             <span
@@ -52,27 +65,43 @@ export function EventCard({ event }: EventCardProps) {
             <span />
           )}
 
-          {/* Date badge */}
-          <div className="shrink-0 rounded-md bg-muted px-2 py-1 text-center">
-            {event.dateEnd && event.dateEnd !== event.dateStart ? (
-              <>
-                <span className="block text-[11px] font-bold leading-tight text-foreground">
-                  {format(new Date(event.dateStart), 'dd')}–{format(new Date(event.dateEnd), 'dd')}
-                </span>
-                <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {format(new Date(event.dateStart), 'MMM')}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="block text-base font-bold leading-none text-foreground">
-                  {format(new Date(event.dateStart), 'dd')}
-                </span>
-                <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {format(new Date(event.dateStart), 'MMM')}
-                </span>
-              </>
-            )}
+          <div className="flex shrink-0 items-center gap-1.5">
+            {/* Heart / favorite */}
+            <button
+              type="button"
+              onClick={handleFavorite}
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-rose-500"
+            >
+              <Heart
+                className="h-4 w-4"
+                fill={isFavorite ? '#f43f5e' : 'none'}
+                stroke={isFavorite ? '#f43f5e' : 'currentColor'}
+              />
+            </button>
+
+            {/* Date badge */}
+            <div className="rounded-md bg-muted px-2 py-1 text-center">
+              {event.dateEnd && event.dateEnd !== event.dateStart ? (
+                <>
+                  <span className="block text-[11px] font-bold leading-tight text-foreground">
+                    {format(new Date(event.dateStart), 'dd')}–{format(new Date(event.dateEnd), 'dd')}
+                  </span>
+                  <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {format(new Date(event.dateStart), 'MMM')}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="block text-base font-bold leading-none text-foreground">
+                    {format(new Date(event.dateStart), 'dd')}
+                  </span>
+                  <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    {format(new Date(event.dateStart), 'MMM')}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

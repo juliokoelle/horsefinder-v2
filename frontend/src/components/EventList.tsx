@@ -11,9 +11,11 @@ interface EventListProps {
   highlightedEventId?: string | null;
   onHoverEvent?: (eventId: string | null) => void;
   onReset?: () => void;
+  favoriteIds?: Set<string>;
+  onFavoriteToggle?: (eventId: string) => void;
 }
 
-export function EventList({ events, isLoading, highlightedEventId, onHoverEvent, onReset }: EventListProps) {
+export function EventList({ events, isLoading, highlightedEventId, onHoverEvent, onReset, favoriteIds, onFavoriteToggle }: EventListProps) {
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -62,7 +64,11 @@ export function EventList({ events, isLoading, highlightedEventId, onHoverEvent,
           onMouseEnter={() => onHoverEvent?.(event.id)}
           onMouseLeave={() => onHoverEvent?.(null)}
         >
-          <EventCard event={event} />
+          <EventCard
+            event={event}
+            isFavorite={favoriteIds?.has(event.id)}
+            onFavoriteToggle={onFavoriteToggle}
+          />
         </div>
       ))}
     </div>
