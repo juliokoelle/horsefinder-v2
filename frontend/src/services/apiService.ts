@@ -35,6 +35,7 @@ interface ApiEvent {
   date_end: string;
   discipline: string;
   levels: string[];
+  prize_money: number | null;
   lat: number;
   lng: number;
   source_url: string | null;
@@ -52,6 +53,7 @@ function mapEvent(r: ApiEvent): EventWithDistance {
     dateEnd: r.date_end,
     discipline: r.discipline as EquestrianEvent['discipline'],
     levels: r.levels as EquestrianEvent['levels'],
+    prize_money: r.prize_money ?? null,
     lat: r.lat,
     lng: r.lng,
     sourceUrl: r.source_url,

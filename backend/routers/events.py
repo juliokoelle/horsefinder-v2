@@ -12,6 +12,8 @@ router = APIRouter(prefix="/events", tags=["events"])
 
 
 def _map_row(row: dict, distance: float | None = None) -> Event:
+    level = row.get("level")
+    levels = [level] if level else (row.get("levels") or [])
     return Event(
         id=row["id"],
         name=row["title"],
@@ -21,7 +23,8 @@ def _map_row(row: dict, distance: float | None = None) -> Event:
         date_start=row["start_date"],
         date_end=row.get("end_date") or row["start_date"],
         discipline=row["discipline"],
-        levels=row.get("levels") or [],
+        levels=levels,
+        prize_money=row.get("prize_money"),
         lat=row.get("lat") or 0.0,
         lng=row.get("lng") or 0.0,
         source_url=row.get("source_url"),

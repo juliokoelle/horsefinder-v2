@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { EventWithDistance } from '@/services/eventService';
+import { EventWithDistance } from '@/services/apiService';
 import { MapBounds, UserLocation } from '@/types/event';
 import { getSortedLevels, LEVEL_STYLE_CLASSES } from '@/lib/eventLevels';
 import { Search } from 'lucide-react';

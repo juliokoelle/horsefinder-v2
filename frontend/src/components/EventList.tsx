@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { EventCard } from '@/components/EventCard';
-import { EventWithDistance } from '@/services/eventService';
+import { EventWithDistance } from '@/services/apiService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 

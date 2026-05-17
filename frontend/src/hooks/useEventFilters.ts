@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { EventFilters, Discipline, Level, MapBounds } from '@/types/event';
 
-const LEVEL_ORDER: Level[] = ['S', 'M', 'L', 'A', 'E'];
+const LEVEL_ORDER: Level[] = ['S', 'M*', 'M', 'L', 'A**', 'A*', 'A', 'E', 'WB'];
 
 const sortLevels = (levels: Level[]) =>
   [...levels].sort((a, b) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b));

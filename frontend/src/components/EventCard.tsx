@@ -1,11 +1,13 @@
 import { format } from 'date-fns';
-import { ExternalLink, ArrowRight, MapPin } from 'lucide-react';
+import { ExternalLink, ArrowRight, MapPin, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { EventWithDistance } from '@/services/eventService';
-import { DISCIPLINE_LABELS } from '@/types/event';
+import { EventWithDistance } from '@/services/apiService';
+import { DISCIPLINE_LABELS, Level } from '@/types/event';
 import { getSortedLevels, LEVEL_STYLE_CLASSES } from '@/lib/eventLevels';
+
+const VALID_LEVELS = new Set<Level>(['E', 'A', 'A*', 'A**', 'L', 'M', 'M*', 'S', 'WB']);
 
 export const DISCIPLINE_COLORS: Record<string, string> = {
   dressage:     '#3B82F6',
@@ -23,7 +25,7 @@ interface EventCardProps {
 
 export function EventCard({ event }: EventCardProps) {
   const navigate = useNavigate();
-  const sortedLevels = getSortedLevels(event.levels);
+  const sortedLevels = getSortedLevels(event.levels.filter((l) => VALID_LEVELS.has(l)));
   const locationLine = event.distance !== null ? `${event.distance} km · ${event.city}` : event.city;
   const accentColor = DISCIPLINE_COLORS[event.discipline] ?? DISCIPLINE_COLORS.unknown;
 
@@ -85,9 +87,9 @@ export function EventCard({ event }: EventCardProps) {
           <span>{locationLine}</span>
         </p>
 
-        {/* Level badges */}
-        {sortedLevels.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+        {/* Level badges + prize money */}
+        {(sortedLevels.length > 0 || event.prize_money) && (
+          <div className="flex flex-wrap items-center gap-1.5">
             {sortedLevels.map((level) => (
               <span
                 key={level}
@@ -96,6 +98,12 @@ export function EventCard({ event }: EventCardProps) {
                 {level}
               </span>
             ))}
+            {event.prize_money && event.prize_money > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-yellow-300/50 bg-yellow-50 px-2.5 py-1 text-xs font-semibold text-yellow-700">
+                <Trophy className="h-3 w-3" />
+                {event.prize_money.toLocaleString('de-DE')} €
+              </span>
+            )}
           </div>
         )}
 

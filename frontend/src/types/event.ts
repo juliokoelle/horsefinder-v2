@@ -1,5 +1,5 @@
 export type Discipline = 'show_jumping' | 'dressage' | 'eventing' | 'driving' | 'vaulting' | 'leisure' | 'unknown';
-export type Level = 'E' | 'A' | 'L' | 'M' | 'S';
+export type Level = 'E' | 'A' | 'A*' | 'A**' | 'L' | 'M' | 'M*' | 'S' | 'WB';
 
 export interface EquestrianEvent {
   id: string;
@@ -11,6 +11,7 @@ export interface EquestrianEvent {
   dateEnd: string;
   discipline: Discipline;
   levels: Level[];
+  prize_money: number | null;
   lat: number;
   lng: number;
   sourceUrl: string | null;

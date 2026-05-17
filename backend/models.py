@@ -13,6 +13,7 @@ class Event(BaseModel):
     date_end: str
     discipline: str
     levels: list[str]
+    prize_money: float | None = None
     lat: float
     lng: float
     source_url: str | None = None

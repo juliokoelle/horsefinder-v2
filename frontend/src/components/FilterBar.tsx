@@ -40,7 +40,7 @@ interface FilterBarProps {
   onReset: () => void;
 }
 
-const LEVEL_OPTIONS: Level[] = ['E', 'A', 'L', 'M', 'S'];
+const LEVEL_OPTIONS: Level[] = ['E', 'A', 'A*', 'A**', 'L', 'M', 'M*', 'S', 'WB'];
 
 export function FilterBar({
   city,
